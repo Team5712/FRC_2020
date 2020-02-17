@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.text.DecimalFormat;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FollowerType;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -29,7 +31,7 @@ public class Shooter {
     WPI_TalonFX shooterSlave = new WPI_TalonFX(8);
 
     CANSparkMax hoodAdjuster = new CANSparkMax(9, CANSparkMax.MotorType.kBrushless);
-
+    private CANSparkMax turret_spin  = new CANSparkMax(10, CANSparkMax.MotorType.kBrushless);
     AnalogPotentiometer hoodAdjusterPot;
 
     
@@ -46,7 +48,7 @@ public class Shooter {
         // pidController.setFF(0);
         // pidController.setOutputRange(0, Const.SHOOTING_TARGET_RPM);
 
-        hoodAdjusterPot = new AnalogPotentiometer(0);
+        hoodAdjusterPot = new AnalogPotentiometer(2, 10);
 
         shooterMaster.config_kP(0, Const.SHOOTING_Kp, 30);
         shooterMaster.config_kI(0, Const.SHOOTING_Ki, 30);
@@ -62,6 +64,8 @@ public class Shooter {
 
     public void shoot() {
         setPowerRPM();
+        System.out.println("Error:" + shooterMaster.getClosedLoopError());
+    
         //setPower(.2);
         
     }
@@ -93,21 +97,31 @@ public class Shooter {
     }
 
     public void printHoodPosition() {
-        System.out.println(hoodAdjusterPot.get());
+        System.out.println(new DecimalFormat("#.##").format(hoodAdjusterPot.get()));
     }
 
     public void setHoodBackPosition() {
         double error = Const.HOOD_BACK - hoodAdjusterPot.get();
         double output = Const.HOOD_Kp * error;
         double final_output = Math.min(Math.max(output, Const.HOOD_MINOUTPUT), Const.HOOD_MAXOUTPUT);
-        this.setPower(final_output);
+        System.out.println("final_output: " + final_output);
+        this.setHoodPower(final_output);
     }
 
     public void setHoodFrontPosition() {
         double error = Const.HOOD_FRONT - hoodAdjusterPot.get();
         double output = Const.HOOD_Kp * error;
         double final_output = Math.min(Math.max(output, Const.HOOD_MINOUTPUT), Const.HOOD_MAXOUTPUT);
-        this.setPower(final_output);
+        this.setHoodPower(final_output);
+        System.out.println("final_output: " + final_output);
+    }
+
+    public void setHoodMiddlePosition() {
+        double error = Const.HOOD_MIDDLE - hoodAdjusterPot.get();
+        double output = Const.HOOD_Kp * error;
+        double final_output = Math.min(Math.max(output, Const.HOOD_MINOUTPUT), Const.HOOD_MAXOUTPUT);
+        this.setHoodPower(final_output);
+        System.out.println("final_output: " + final_output);
     }
 
     public void setHoodPower(double power) {

@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConst
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.Const;
+import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.DriveTrainNeo;
 
 /**
@@ -20,7 +21,7 @@ import frc.robot.subsystems.DriveTrainNeo;
  */
 public class RobotContainer {
 
-    private DriveTrainNeo drive = new DriveTrainNeo();
+    private DriveTrain drive = new DriveTrain();
 
     public Command getAutonomousCommand() {
         var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(

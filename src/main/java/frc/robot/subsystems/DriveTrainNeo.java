@@ -102,7 +102,7 @@ public class DriveTrainNeo extends SubsystemBase {
         leftMaster.set(leftVolts / 12);
         rightMaster.set(rightVolts / 12);
 
-        System.out.println("x " + position.getTranslation().getX() + " y " + position.getTranslation().getY());
+        //System.out.println("x " + position.getTranslation().getX() + " y " + position.getTranslation().getY());
     }
 
     /**

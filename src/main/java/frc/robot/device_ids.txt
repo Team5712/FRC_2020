@@ -1,0 +1,17 @@
+
+1 : Left Master
+2 : Left Slave
+3 : Right Master
+4 : Right Slave
+5 : Intake
+6 : Front Conveyor
+7 : Back Conveyor
+8 : Turret Turn
+9 : Turret Hood
+10 : Turret Shoot Master
+11 : Turret Shoot Slave
+12 : Climber
+
+Single Solenoid - Drive Gearbox Shifter
+Single Solenoid - Turret Elevator Up/Down
+Single Solenoid - Intake Up/Down

@@ -20,9 +20,10 @@ public class Const {
     // public static final double SHOOTING_MAX_RPM = 4000;
     
 
-    public static final double HOOD_BACK = 0.53;
-    public static final double HOOD_FRONT = 0.51;
-    public static final double HOOD_Kp = 0.00001;
+    public static final double HOOD_BACK = 9.71;
+    public static final double HOOD_FRONT = 9.42;
+    public static final double HOOD_MIDDLE = 9.57;
+    public static final double HOOD_Kp = 2;
     public static final double HOOD_MAXOUTPUT = 0.1;
     public static final double HOOD_MINOUTPUT = -0.1;
     
@@ -35,7 +36,7 @@ public class Const {
     public static final double SHOOTING_Kf = 0.0639;
     public static final double SHOOTING_Ki = .001; //.001
     public static final double SHOOTING_Kizone = 80; //50
-    public static final double SHOOTING_TARGET_RPM = 3000;
+    public static final double SHOOTING_TARGET_RPM = 9000;
     public static final double SHOOTING_UNITS_PER_REV = 820;
 
     // TODO: prefix these
