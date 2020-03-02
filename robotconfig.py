@@ -27,4 +27,3 @@
     "gyroPort": "SPI.Port.kMXP",
 }
 
-

@@ -2,10 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.EncoderType;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.I2C.Port;
@@ -23,32 +19,22 @@ import frc.Const;
 import frc.robot.RoboMath;
 
 /**
- * DriveTrain
+ * TestDriveTrain
  */
-public class DriveTrainNeo extends SubsystemBase {
+public class TestDriveTrain extends SubsystemBase {
 
-    // private WPI_TalonSRX leftMaster = new WPI_TalonSRX(1);
-    // private WPI_TalonSRX leftSlave = new WPI_TalonSRX(2);
+    private WPI_TalonSRX leftMaster = new WPI_TalonSRX(1);
+    private WPI_TalonSRX leftSlave = new WPI_TalonSRX(2);
 
-    // private WPI_TalonSRX rightMaster = new WPI_TalonSRX(5);
-    // private WPI_TalonSRX rightSlave = new WPI_TalonSRX(6);
+    private WPI_TalonSRX rightMaster = new WPI_TalonSRX(5);
+    private WPI_TalonSRX rightSlave = new WPI_TalonSRX(6);
 
-     private CANSparkMax leftMaster = new CANSparkMax(1, MotorType.kBrushless);
-     private CANSparkMax leftSlave = new CANSparkMax(2, MotorType.kBrushless);
-
-    private CANSparkMax rightMaster = new CANSparkMax(3, MotorType.kBrushless);
-    private CANSparkMax rightSlave = new CANSparkMax(4, MotorType.kBrushless);
-    
-    private CANEncoder leftEncoder;
-    private CANEncoder rightEncoder;
-
-    private DifferentialDrive drive;
+    private DifferentialDrive drive = new DifferentialDrive(leftMaster, rightMaster);
 
     private AHRS gyro = new AHRS(Port.kMXP);
 
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Const.TRACK_WIDTH);
-    // private Pose2d position = new Pose2d(0.0, 0.0, getHeading());
-    private Pose2d position = new Pose2d(3.157, -2.361, getHeading());
+    private Pose2d position = new Pose2d(0.0, 0.0, getHeading());
 
     private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading(), position);
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka);
@@ -56,18 +42,15 @@ public class DriveTrainNeo extends SubsystemBase {
     private PIDController leftPidController = new PIDController(Const.Kp, Const.Kd, 0); // .835
     private PIDController rightPidController = new PIDController(Const.Kp, Const.Kd, 0); // .835
 
-    public DriveTrainNeo() {
+    public TestDriveTrain() {
+        leftSlave.follow(leftMaster);
+        rightSlave.follow(rightMaster);
 
-         leftSlave.follow(leftMaster);
-         rightSlave.follow(rightMaster);
-        
-         leftMaster.setInverted(true);
-        rightMaster.setInverted(false);
+        leftMaster.setInverted(false);
+        rightMaster.setInverted(true);
 
-        drive = new DifferentialDrive(leftMaster, rightMaster);
-
-        leftEncoder = leftMaster.getEncoder();
-        rightEncoder = rightMaster.getEncoder();
+        leftMaster.setSensorPhase(true);
+        rightMaster.setSensorPhase(true);
 
         resetEncoders();
         zeroHeading();
@@ -76,9 +59,21 @@ public class DriveTrainNeo extends SubsystemBase {
     @Override
     public void periodic() {
 
-        // System.out.println("Velocity left: " + leftMaster.getEncoder().getVelocity() + "Velocity right: " + rightMaster.getEncoder().getVelocity()  );
-        // position = odometry.update(getHeading(), RoboMath.ticksToMeters(leftMaster.getSelectedSensorPosition(0)), RoboMath.ticksToMeters(rightMaster.getSelectedSensorPosition(0)));
-        position = odometry.update(getHeading(), RoboMath.ticksToMeters(leftEncoder.getPosition()), RoboMath.ticksToMeters(rightEncoder.getPosition()));
+        // leftDistance = RoboMath.toInches(leftMaster.getSelectedSensorPosition(0) -
+        // leftDistance);
+        // rightDistance = RoboMath.toInches(rightMaster.getSelectedSensorPosition(0) -
+        // rightDistance);
+        // System.out.println("leftDistance = " + leftDistance + " rightDistane = " +
+        // rightDistance);
+        // position = odometry.update(getHeading(), Units.inchesToMeters(leftDistance),
+        // Units.inchesToMeters(rightDistance));
+
+        // System.out.println("left " + (leftMaster.getSelectedSensorPosition(0) -
+        // previousTicksLeft) + " right "
+        // + (rightMaster.getSelectedSensorPosition(0) - previousTicksRight));
+        // System.out.println("left "+ deltaMetersLeft + " right " + deltaMetersRight);
+
+        position = odometry.update(getHeading(), RoboMath.ticksToMeters(leftMaster.getSelectedSensorPosition(0)), RoboMath.ticksToMeters(rightMaster.getSelectedSensorPosition(0)));
     }
 
     // /**
@@ -92,25 +87,34 @@ public class DriveTrainNeo extends SubsystemBase {
     // }
 
     public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-        return new DifferentialDriveWheelSpeeds(
-            leftEncoder.getVelocity() / 7 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60,
-            rightEncoder.getVelocity() / 7 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60
-            );
+        // return new DifferentialDriveWheelSpeeds(
+        // leftMaster.getSelectedSensorVelocity(0) / Const.GEAR_RATIO * 2 * Math.PI
+        // * Units.inchesToMeters(Const.WHEEL_RADIUS) / 60,
+        // rightMaster.getSelectedSensorVelocity(0) / Const.GEAR_RATIO * 2 * Math.PI
+        // * Units.inchesToMeters(Const.WHEEL_RADIUS) / 60);
+
+        return new DifferentialDriveWheelSpeeds(RoboMath.ticksToMeters(leftMaster.getSelectedSensorVelocity(0) * 10),
+                RoboMath.ticksToMeters(rightMaster.getSelectedSensorVelocity(0) * 10));
     }
 
     public void setVolts(double leftVolts, double rightVolts) {
+        // System.out.println("position " + position.getTranslation().getX() + " y " + position.getTranslation().getY()
+        //         + " Angle " + getHeading());
+
+        // System.out.println("left " + leftMaster.getSelectedSensorPosition(0) + " right " + rightMaster.getSelectedSensorPosition(0));
+
+        // System.out.println("left speed: " + RoboMath.ticksToMeters(leftMaster.getSelectedSensorVelocity(0) * 10) + "right speed: " + RoboMath.ticksToMeters(rightMaster.getSelectedSensorVelocity(0) * 10));
+        drive.feed();
         leftMaster.set(leftVolts / 12);
         rightMaster.set(rightVolts / 12);
-
-        //System.out.println("x " + position.getTranslation().getX() + " y " + position.getTranslation().getY());
     }
 
     /**
      * Resets the drive encoders to currently read a position of 0.
      */
     public void resetEncoders() {
-        leftEncoder.setPosition(0);
-        rightEncoder.setPosition(0);
+        leftMaster.setSelectedSensorPosition(0);
+        rightMaster.setSelectedSensorPosition(0);
     }
 
     /**

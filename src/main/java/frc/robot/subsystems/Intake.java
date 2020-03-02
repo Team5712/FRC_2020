@@ -10,11 +10,31 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Solenoid;
+
 /**
  * Add your docs here.
  */
 public class Intake {
-    //private CANSparkMax Intake = new CANSparkMax(11, MotorType.kBrushless);
+    private CANSparkMax intake = new CANSparkMax(5, MotorType.kBrushless);
+    private CANSparkMax frontConveyor = new CANSparkMax(6, MotorType.kBrushless);
+    private CANSparkMax backConveyor = new CANSparkMax(7, MotorType.kBrushless);
+    // TODO: set id
+    //private Solenoid intakeSolenoid = new Solenoid(0);
    
+    public void setSolenoid(boolean position) {
+       // intakeSolenoid.set(position);
+    }
 
+    public void setIntakePower(double power) {
+        intake.set(power);
+    }
+
+    public void setFrontConveyorPower(double power) {
+        frontConveyor.set(power);
+    }
+
+    public void setBackConveyorPower(double power) {
+        backConveyor.set(power);
+    }
 }

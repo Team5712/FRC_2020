@@ -7,16 +7,21 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import java.util.ArrayList;
+import java.util.function.Consumer;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.Shooter;
+import frc.Const;
+import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Turret;
+import frc.robot.subsystems.Vision;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -33,165 +38,249 @@ public class Robot extends TimedRobot {
 
     public Joystick leftJoystick = new Joystick(0);
     public Joystick rightJoystick = new Joystick(1);
+    public Joystick auxJoystick = new Joystick(2);
     public String autonMode = "";
 
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-two");
-    NetworkTableEntry tx = table.getEntry("tx");
-    NetworkTableEntry ty = table.getEntry("ty");
-    NetworkTableEntry ta = table.getEntry("ta");
-    double left_command = 0;
-    double right_command = 0;
+    private Command currentCommand;
+    private int commandNumber = 0;
 
-    private Command autonomousCommand;
+    private Vision vision = new Vision();
+    private Climber climber = new Climber();
+    private Intake intake = new Intake();
+    private Hood hood = new Hood();
 
     private RobotContainer container;
 
-    Shooter shooter = new Shooter();
+    Turret turret = new Turret();
     SendableChooser<String> chooser = new SendableChooser<String>();
 
     @Override
     public void robotInit() {
         container = new RobotContainer();
         chooser.addOption("startmidclose3balltrench", "startmidclose3balltrench");
-        chooser.addOption("startright3balltrench", "startright3balltrench");
+        // chooser.addOption("startright3balltrench", "startright3balltrench");
         chooser.addOption("startmidfar3balltrench", "startmidfar3balltrench");
-        chooser.addOption("startmidfar5balltrench", "startmidfar5balltrench");
-        chooser.addOption("startmidclose5balltrench", "startmidclose5balltrench");
-        chooser.addOption("startmidright5balltrench", "startmidright5balltrench");
-        chooser.addOption("startmidclose2ballren", "startmidclose2ballren");
-        chooser.addOption("startmidclose3ballren", "startmidclose3ballren");
-        chooser.addOption("startleft2balltrench", "startleft2balltrench");
-        chooser.addOption("Cit_Circuits", "Cit_Circuits");
+        // chooser.addOption("startmidfar5balltrench", "startmidfar5balltrench");
+        // chooser.addOption("startmidclose5balltrench", "startmidclose5balltrench");
+        // chooser.addOption("startmidright5balltrench", "startmidright5balltrench");
+        // chooser.addOption("startmidclose2ballren", "startmidclose2ballren");
+        // chooser.addOption("startmidclose3ballren", "startmidclose3ballren");
+        // chooser.addOption("startleft2balltrench", "startleft2balltrench");
+        // chooser.addOption("Cit_Circuits", "Cit_Circuits");
         SmartDashboard.putData("Auto Mode", chooser);
+
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Look for every path inside of our path folder prefixed with the appropriate
+        // group and load them
+        // ....................................................................................................
+        
+        // String autoSelection = "";
+        ArrayList<String> trajectoryPaths = new ArrayList<String>();
+
+        // if (chooser.getSelected() == null || chooser.getSelected().isEmpty()) {
+        //     System.out.println("dashboard is null!");
+        //     autoSelection = "startmidfar3balltrench";
+        // } else {
+        //     autoSelection = chooser.getSelected();
+        // }
+
+        // System.out.println("Auto Selected: " + autoSelection);
+
+        // File pathFolder = new File(Filesystem.getDeployDirectory().toPath().resolve("paths").toString());
+
+
+        // File[] paths = pathFolder.listFiles();
+
+        // for (File path : paths) {
+        //     String pathName = path.getName();
+
+        //     if (pathName.startsWith(autoSelection)) {
+        //         System.out.println("adding path/" + pathName);
+        //         trajectoryPaths.add("paths/" + pathName);
+        //     }
+        // }
+
+        trajectoryPaths.add("paths/startmidfar3balltrench.wpilib.json");
+        container.loadConfigs(trajectoryPaths);
     }
 
     @Override
     public void autonomousInit() {
         container.resetSensors();
         System.out.println("Autonomous has started");
-        autonomousCommand = container.getAutonomousCommand();
-         String auton = chooser.getSelected();
-         switch (auton) {
-        case "startmidclose3balltrench":
-        autonMode = "startmidclose3balltrench";
-        break;
-        case "startright3balltrench":
-        autonMode = "startright3balltrench";
-        break;
-        case "startmidfar3balltrench":
-        autonMode = "startmidfar3balltrench";
-        break;
-        case "startmidfar5balltrench":
-        autonMode = "startmidfar5balltrench";
-        break;
-        case "startmidclose5balltrench":
-        autonMode = "startmidclose5balltrench";
-        break;
-        case "startmidright5balltrench":
-        autonMode = "startmidright5balltrench";
-        break;
-        case "startmidclose2ballren":
-        autonMode = "startmidclose2ballren";
-        break;
-        case "startmidclose3ballren":
-        autonMode = "startmidclose3ballren";
-        break;
-        case "startleft2balltrench":
-        autonMode = "startleft2balltrench";
-        break;
-        case "Cit_Circuits":
-        autonMode = "Cit_Circuits";
-        break;
-        default:
-        break;
-    }
 
+        currentCommand = container.getNextAutonomousCommand();
 
-        if(chooser.getSelected() == "auto"){
-            autonomousCommand = container.getAutonomousCommand();
-        } else {
-            autonomousCommand = null;
+        if (currentCommand != null) {
+            currentCommand.schedule();
         }
 
-        if (autonomousCommand != null) {
-            autonomousCommand.schedule();
-        }
+        Consumer<Command> increment = a -> commandNumber++;
+        CommandScheduler.getInstance().onCommandFinish(increment);
+
+        // autoTimer.reset();
+        // autoTimer.start();
     }
 
     @Override
     public void autonomousPeriodic() {
-       //CommandScheduler.getInstance().run();
-        
+
+        if (commandNumber == 0) {
+            CommandScheduler.getInstance().run();
+            System.out.println("RUNNING FIRST");
+        } else if (commandNumber == 1) {
+
+            System.out.println("ONTO SECOND COMMAND");
+        } else {
+            System.out.println(" no work :(");
+        }
     }
 
     @Override
     public void teleopInit() {
         container.resetSensors();
-        shooter.resetShooterTicks();
+        turret.resetShooterTicks();
     }
 
     @Override
     public void teleopPeriodic() {
-        double x = tx.getDouble(0.0);
-        double y = ty.getDouble(0.0);
-        double area = ta.getDouble(0.0);
-        float Kp = -0.03f; // Proportional control constant
-        double min_command = 0.09;
+        handlePrimaryDriverInput();
+        handleSecondaryDriverInput();
 
-        if (leftJoystick.getRawButton(3)) {
-            double steering_adjust = 0;
-            left_command = 0;
-            right_command = 0;
+        SmartDashboard.putNumber("Joystick X value", leftJoystick.getX());
+        // System.out.println(chooser.getSelected());
 
-            if (x > .5) {
-                steering_adjust = Kp * x - min_command;
-            } else if (x < -.5) {
-                steering_adjust = Kp * x + min_command;
-            }
+    }
 
-            left_command -= steering_adjust;
-            right_command += steering_adjust;
-            //System.out.println("Left_command: " + left_command);
-            //System.out.println("Right_command: " + right_command);
-            container.TankDrive(left_command - leftJoystick.getRawAxis(1), right_command - rightJoystick.getRawAxis(1));
-        } else {
-            container.TankDrive(-leftJoystick.getRawAxis(1), -rightJoystick.getRawAxis(1));
-        }
+    /**
+     * Handle input for the primary driver ((left/right)Joystick)
+     */
+    private void handlePrimaryDriverInput() {
 
+        // Shifting
         if (leftJoystick.getRawButton(1)) {
-            shooter.shoot();
-            //shooter.printShooterTicks();
-            //shooter.printHoodPosition();
+            container.shift(true);
         } else {
-            shooter.stop();
-        } 
-        if (rightJoystick.getRawButton(2)) {
-            //shooter.setHoodPower(.1);
-            shooter.printHoodPosition();
-            shooter.setHoodBackPosition();
+            container.shift(false);
         }
-         else if(rightJoystick.getRawButton(3)) {
-            //shooter.setHoodPower(-.1);
-            shooter.setHoodFrontPosition();
-            //shooter.printHoodPosition();
-        } 
-        else if(rightJoystick.getRawButton(4)) {
-            //shooter.setHoodPower(-.1);
-            shooter.setHoodMiddlePosition();
-            //shooter.printHoodPosition();
-        }
-        else{
-            shooter.setHoodPower(0);
-        }
-            //shooter.printHoodPosition();
 
-        container.TankDrive(-leftJoystick.getRawAxis(1), -rightJoystick.getRawAxis(1));
-        SmartDashboard.putNumber("Joystick X value", leftJoystick.getX()); 
-        System.out.println(chooser.getSelected());
-        
-        
-    }   
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Intake
+        // .............................................................................
 
+        // run ground intake
+        if (rightJoystick.getRawButton(4)) {
+            intake.setIntakePower(-Const.INTAKE_SPEED);
+            intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
+            // Run conveyors to pick directly from station
+        } else if (rightJoystick.getRawButton(2)) {
+            intake.setIntakePower(Const.INTAKE_SPEED);
+            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+        } else {
+            intake.setIntakePower(0);
+            intake.setFrontConveyorPower(0);
+        }
+
+        // run conveyor
+        if (leftJoystick.getRawButton(4)) {
+            intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
+        } else if (leftJoystick.getRawButton(3)) {
+            intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+        } else {
+            intake.setBackConveyorPower(0);
+        }
+
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Drive Handling
+        // .............................................................................
+
+        // Auto center on target
+        if (rightJoystick.getRawButton(1)) {
+            // TODO: Test turn
+
+            double[] turnValues = vision.getTurnValues();
+            // System.out.println("left adjust " + turnValues[0] + "right adjust " +
+            // turnValues[1]);
+            container.TankDrive(turnValues[0] - leftJoystick.getRawAxis(1),
+                    turnValues[1] - rightJoystick.getRawAxis(1));
+
+            // default drive
+        } else {
+            container.TankDrive(-leftJoystick.getRawAxis(1), rightJoystick.getRawAxis(1));
+        }
+
+        // reverse intake
+        if (rightJoystick.getRawButton(3)) {
+            // intake.setSolenoid(true);
+            intake.setIntakePower(Const.INTAKE_SPEED);
+            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+            intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+        }
+    }
+
+    /**
+     * Handle input for the secondary driver (auxJoystick)
+     */
+    private void handleSecondaryDriverInput() {
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Climbing
+        // .............................................................................
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Turret
+        // .............................................................................
+
+        // Left
+        if (auxJoystick.getRawButton(5)) {
+            // TODO: check direction
+            turret.setTurretYawPower(Const.TURRET_YAW_RATE);
+            // Right
+        } else if (auxJoystick.getRawButton(6)) {
+            turret.setTurretYawPower(-Const.TURRET_YAW_RATE);
+        } else {
+            turret.setTurretYawPower(0);
+        }
+
+        if (auxJoystick.getRawButton(1)) {
+            hood.setPower(.1);
+        } else if (auxJoystick.getRawButton(4)) {
+            hood.setPower(-.1);
+        } else if (auxJoystick.getRawButton(3)) {
+            hood.setPosition(Const.HOOD_CONTROL_PANEL_POSITION);
+        } else {
+            // hood.setPosition(Const.HOOD_MAX_POSITION);
+            hood.setPower(0);
+        }
+
+        // if(auxJoystick.getRawButton(1)) {
+        // hood.setHoodPosition(1);
+        // }
+
+        if (auxJoystick.getRawAxis(3) > .3) {
+            turret.shoot();
+            // turret.setPower(0.6);
+        } else {
+            turret.stop();
+        }
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Climbing
+        // .............................................................................
+
+        // right joystick handles climbing
+        if (auxJoystick.getRawAxis(5) > 0.3) {
+            climber.setPower(-Const.CLIMB_SPEED);
+        } else if (auxJoystick.getRawAxis(5) < -0.3) {
+            climber.setPower(Const.CLIMB_SPEED);
+        } else {
+            climber.setPower(0);
+        }
+
+        // B Button for Popup actuation
+        if (auxJoystick.getRawButton(2)) {
+            turret.setPopUpPosition(true);
+        } else {
+            turret.setPopUpPosition(false);
+        }
+    }
 
     @Override
     public void testInit() {
