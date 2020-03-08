@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FollowerType;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
 
@@ -38,7 +39,8 @@ public class Turret {
 
     public void shoot() {
         shooterMaster.set(ControlMode.Velocity, Const.SHOOTING_UNITS_PER_REV * Const.SHOOTING_TARGET_RPM / 600);
-        System.out.println("Turret Error (ticks): " + shooterMaster.getClosedLoopError(0));
+        shooterSlave.set(ControlMode.Velocity, Const.SHOOTING_UNITS_PER_REV * Const.SHOOTING_TARGET_RPM / 600);
+        // System.out.println("Turret Error (ticks): " + shooterMaster.getClosedLoopError());
     }
 
     public void setPower(double power) {
@@ -55,11 +57,6 @@ public class Turret {
         popUp.set(position);
     }
 
-    public void printShooterTicks() {
-        System.out.println("Master: " + shooterMaster.getSelectedSensorPosition());
-        System.out.println("Slave: " + shooterSlave.getSelectedSensorPosition());
-    }
-
     public void setTurretYawPosition(double position) {
         // TODO: create ratio between degrees and potentiometer values
     }
@@ -68,35 +65,12 @@ public class Turret {
         turretYawAdjuster.set(power);
     }
 
-    // public void setHoodBackPosition() {
-    // double error = Const.HOOD_BACK - yawPotentiometer.get();
-    // double output = Const.HOOD_Kp * error;
-    // double final_output = Math.min(Math.max(output, Const.HOOD_MINOUTPUT),
-    // Const.HOOD_MAXOUTPUT);
-    // System.out.println("final_output: " + final_output);
-    // this.setHoodPower(final_output);
-    // }
-
-    // public void setHoodFrontPosition() {
-    // double error = Const.HOOD_FRONT - yawPotentiometer.get();
-    // double output = Const.HOOD_Kp * error;
-    // double final_output = Math.min(Math.max(output, Const.HOOD_MINOUTPUT),
-    // Const.HOOD_MAXOUTPUT);
-    // this.setHoodPower(final_output);
-    // System.out.println("final_output: " + final_output);
-    // }
-
-    // public void setHoodMiddlePosition() {
-    // double error = Const.HOOD_MIDDLE - yawPotentiometer.get();
-    // double output = Const.HOOD_Kp * error;
-    // double final_output = Math.min(Math.max(output, Const.HOOD_MINOUTPUT),
-    // Const.HOOD_MAXOUTPUT);
-    // this.setHoodPower(final_output);
-    // System.out.println("final_output: " + final_output);
-    // }
-
     public void resetShooterTicks() {
         shooterMaster.setSelectedSensorPosition(0, 0, 10);
         shooterSlave.setSelectedSensorPosition(0, 0, 10);
+    }
+
+    public double getShooterError() {
+        return shooterMaster.getClosedLoopError();
     }
 }

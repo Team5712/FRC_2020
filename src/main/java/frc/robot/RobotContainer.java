@@ -22,24 +22,35 @@ import frc.robot.subsystems.TestDriveTrain;
  */
 public class RobotContainer {
 
-    private DriveTrain drive = new DriveTrain();
+    public DriveTrain drive = new DriveTrain();
 
     ArrayList<Command> commands = new ArrayList<Command>();
 
     // TODO: create a dict of paths for a given autonomous mode
 
     public void loadConfigs(ArrayList<String> trajectoryPaths) {
+
+        int index = 0;
+
         for (String path : trajectoryPaths) {
             Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(path);
             try {
+
                 Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+                
+                // if(index == 0) {
+                //     drive.setPosition(trajectory.getInitialPose());
+                //     System.out.println("INITIAL POSE " + drive.getPosition());
+                // }
 
                 RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
-                        new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
-                        drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
-                        drive::setVolts, drive);
-
+                new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
+                drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
+                drive::setVolts, drive);
+                
                 commands.add(command);
+
+                index++;
 
             } catch (IOException e) {
                 // TODO: handle this just in case maybe
@@ -55,7 +66,7 @@ public class RobotContainer {
                 new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka), drive.getDifferentialDriveKinematics(), 10);
 
         // TODO: update these
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
+        TrajectoryConfig config = new TrajectoryConfig(4, 4);
 
         config.addConstraint(autoVoltageConstraint);
         config.setKinematics(drive.getDifferentialDriveKinematics());
@@ -65,8 +76,6 @@ public class RobotContainer {
         try {
             Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
             Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-
-            System.out.println(trajectory.getStates());
 
             RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition, new RamseteController(2.0, .7),
                     drive.getFeedFoward(), drive.getDifferentialDriveKinematics(), drive::getWheelSpeeds,
@@ -87,7 +96,7 @@ public class RobotContainer {
 
     public void TankDrive(double left, double right) {
         // drive.setVolts(left * 12, right * 12);
-        drive.useTankDrive(left, right);
+        drive.TankDrive(left, right);
     }
 
     public void shift(boolean position) {

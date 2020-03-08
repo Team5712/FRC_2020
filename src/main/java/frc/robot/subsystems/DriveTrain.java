@@ -53,7 +53,7 @@ public class DriveTrain extends SubsystemBase {
 
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Const.TRACK_WIDTH);
 
-    private Pose2d position = new Pose2d(3.157, -2.361, new Rotation2d(180));
+    private Pose2d position = new Pose2d(3.636, -2.437, new Rotation2d(Math.toRadians(-150)));
 
     private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading(), position);
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka);
@@ -91,6 +91,13 @@ public class DriveTrain extends SubsystemBase {
         leftSlave.burnFlash();
         rightMaster.burnFlash();
         rightSlave.burnFlash();
+    }
+
+    public void setTeleopConfig() {
+        leftMaster.setIdleMode(IdleMode.kCoast);
+        leftSlave.setIdleMode(IdleMode.kCoast);
+        rightMaster.setIdleMode(IdleMode.kCoast);
+        rightSlave.setIdleMode(IdleMode.kCoast);
     }
 
     @Override
@@ -174,10 +181,11 @@ public class DriveTrain extends SubsystemBase {
         System.out.println("gyro yaw: " + gyro.getYaw());
     }
 
-    public void useTankDrive(double left, double right) {
+    public void TankDrive(double left, double right) {
         drive.tankDrive(left, right);
     }
-}   
 
-
-
+    public void setPosition(Pose2d position) {
+        this.position  = position;
+    }
+}

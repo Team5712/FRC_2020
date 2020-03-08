@@ -10,13 +10,12 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class Vision {
 
     private static NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-two");
-    NetworkTableEntry tx = table.getEntry("tx");
-    NetworkTableEntry ty = table.getEntry("ty");
-    NetworkTableEntry ta = table.getEntry("ta");
-
+    
     public double[] getTurnValues() {
-        double x = tx.getDouble(0.0);
-        float Kp = -0.03f; // Proportional control constant
+        enableLEDS();
+
+        double x = table.getEntry("tx").getDouble(0.0);
+        float Kp = -0.045f; // Proportional control constant
         double min_command = 0.2;
 
         double steering_adjust = 0;
@@ -31,6 +30,8 @@ public class Vision {
     }
 
     public static double getDistanceToTarget() {
+        enableLEDS();
+
         double height = getNumber("ty");
 
         if (height == 0) {
@@ -43,15 +44,22 @@ public class Vision {
         return (0.16976 * Math.pow(height, 2)) + (-6.85384 * height) + 117.413;
     }
 
-    public static double getDesiredHoodAngleToTarget(double distanceToTarget) {
-        
-        // TODO: noew
-        return 0;
+    public static double getDesiredHoodAngleToTarget() {
+        // TODO: check adjustment
+        return (getNumber("ty") * -0.66303) - 1.8563;
     }
 
 
-    public void setPipeLine(int pipeline) {
-        // NetworkTableInstance.getDefault().getTable("limelight").getEntry("<variablename>").setNumber(<value>);
+    public static void setNumber(String entry, int number) {
+        table.getEntry(entry).setNumber(number);
+    }
+
+    public static void disableLEDS() {
+        setNumber("ledMode", 1);
+    }
+
+    public static void enableLEDS() {
+        setNumber("ledMode", 3);
     }
 
     public static double getWidth() {
