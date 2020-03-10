@@ -13,8 +13,12 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.Const;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Turret;
 
 /**
  * RobotContainer
@@ -22,6 +26,8 @@ import frc.robot.subsystems.DriveTrain;
 public class RobotContainer {
 
     public DriveTrain drive = new DriveTrain();
+    public Turret turret = new Turret();
+    public Intake intake = new Intake();
 
     private ArrayList<Command> commands = new ArrayList<Command>();
 
@@ -46,7 +52,8 @@ public class RobotContainer {
                 new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
                 drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
                 drive::setVolts, drive);
-                
+                commands.add(new WaitCommand(1).andThen(() -> turret.shoot()).andThen(new WaitCommand(5)).andThen(()->turret.stop()).andThen(()->intake.setIntakePower(Const.INTAKE_SPEED)).andThen(()->intake.setSolenoid(true)));
+
                 commands.add(command);
 
                 index++;
@@ -56,6 +63,8 @@ public class RobotContainer {
                 System.out.println("Unable to open trajectory: " + path);
             }
         }
+
+        commands.add(new WaitCommand(10).andThen(()->turret.shoot()).andThen(new WaitCommand(5)));
 
         System.out.println(trajectoryPaths.size() + " successfully loaded");
     }
@@ -88,6 +97,7 @@ public class RobotContainer {
         // TODO: return empty command to set motors to 0, 0
         return null;
     }
+
 
     public Command getNextAutonomousCommand() {
 

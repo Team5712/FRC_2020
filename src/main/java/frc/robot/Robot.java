@@ -18,6 +18,9 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.command.CommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,12 +55,14 @@ public class Robot extends TimedRobot {
 
     private Vision vision = new Vision();
     private Climber climber = new Climber();
-    private Intake intake = new Intake();
+    // private Intake intake = new Intake();
     private Hood hood = new Hood();
+
+
 
     private RobotContainer container;
 
-    Turret turret = new Turret();
+    // Turret turret = new Turret();
     SendableChooser<String> chooser = new SendableChooser<String>();
 
     private Timer autoTimer = new Timer();
@@ -137,9 +142,20 @@ public class Robot extends TimedRobot {
 
         Command firstCommand = container.getNextAutonomousCommand();
 
+        // SequentialCommandGroup cg = new SequentialCommandGroup(container.shootCommand(), firstCommand);
+        // cg.withTimeout(3);
+
         // load the first command
         if (firstCommand != null) {
+            // WaitCommand wc = new WaitCommand(10);
+            // firstCommand.beforeStarting(container.shootCommand(), container.drive);
+            // WaitUntilCommand wc = new WaitUntilCommand(10);
+
+            
+            
             firstCommand.schedule();
+
+            
         } else {
             System.out.println("command is null!");
         }
@@ -157,8 +173,6 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
 
         CommandScheduler.getInstance().run();
-
-
 
         // switch (commandNumber) {
         // shoot 3 balls
@@ -261,7 +275,7 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         isIntaking = false;
         container.resetSensors();
-        turret.resetShooterTicks();
+        // turret.resetShooterTicks();
     }
 
     @Override
@@ -299,13 +313,13 @@ public class Robot extends TimedRobot {
 
         if (isIntaking) {
 
-            intake.setIntakePower(-Const.INTAKE_SPEED);
-            intake.setSolenoid(true);
+            // intake.setIntakePower(-Const.INTAKE_SPEED);
+            // intake.setSolenoid(true);
 
             // if they aren't reversing
         } else {
-            intake.setIntakePower(0);
-            intake.setSolenoid(false);
+            // intake.setIntakePower(0);
+            // intake.setSolenoid(false);
         }
 
         // left joystick left button disable color sensor
@@ -322,27 +336,27 @@ public class Robot extends TimedRobot {
         // left joystick middle button reverse WHILE intaking
         // left joystick
         if (leftJoystick.getRawButton(4)) {
-            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
-            intake.setIntakePower(Const.INTAKE_SPEED);
-            intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+            // intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+            // intake.setIntakePower(Const.INTAKE_SPEED);
+            // intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
         } else if (leftJoystick.getRawButton(3)) {
-            intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
+            // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
             // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
         } else if (IRSensor.get() && isColorSensorActive && isIntaking) {
             IRSensorTimer.start();
             isIRConveyorRunning = true;
         } else {
-            intake.setFrontConveyorPower(0);
+            // intake.setFrontConveyorPower(0);
             // System.out.println("red " + colorSensor.getRed() + " green " +
             // colorSensor.getGreen() + " alpha " + alpha);
         }
 
         if (isIRConveyorRunning && IRSensorTimer.get() < 0.5) {
             // System.out.println("running timer " + IRSensorTimer.get());
-            intake.setFrontConveyorPower(-0.5);
+            // intake.setFrontConveyorPower(-0.5);
         } else if (!leftJoystick.getRawButton(3) && !leftJoystick.getRawButton(4)) {
             isIRConveyorRunning = false;
-            intake.setFrontConveyorPower(0);
+            // intake.setFrontConveyorPower(0);
         }
 
         // System.out.println("distance " + Vision.getDistanceToTarget());
@@ -400,15 +414,15 @@ public class Robot extends TimedRobot {
         }
 
         if (auxJoystick.getRawAxis(3) > .3) {
-            turret.shoot();
-            if (turret.getShooterError() < Math.abs(Const.INTAKE_BACK_CONVEYOR_THRESHOLD)) {
+            // turret.shoot();
+            // if (turret.getShooterError() < Math.abs(Const.INTAKE_BACK_CONVEYOR_THRESHOLD)) {
                 // TODO: debug this
                 // intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
                 // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-            }
+            // }
         } else {
-            turret.stop();
-            intake.setBackConveyorPower(0);
+            // turret.stop();
+            // intake.setBackConveyorPower(0);
         }
 
         if (auxJoystick.getRawButtonPressed(5)) {
@@ -418,13 +432,13 @@ public class Robot extends TimedRobot {
 
         if (isConveyorReversed && conveyorReverseTimer.get() < 0.1 && auxJoystick.getRawButton(5)) {
             // System.out.println("running timer " + IRSensorTimer.get());
-            intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
-            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+            // intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+            // intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
         } else if (!isConveyorReversed && auxJoystick.getRawButton(5)) {
-            intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-            intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
+            // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
+            // intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
         } else if (auxJoystick.getRawButton(6)) {
-            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+            // intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
         } else {
             isConveyorReversed = false;
             conveyorReverseTimer.reset();
