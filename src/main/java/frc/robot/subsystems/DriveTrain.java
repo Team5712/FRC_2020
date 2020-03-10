@@ -53,7 +53,7 @@ public class DriveTrain extends SubsystemBase {
 
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Const.TRACK_WIDTH);
 
-    private Pose2d position = new Pose2d(3.636, -2.437, new Rotation2d(Math.toRadians(-150)));
+    private Pose2d position = new Pose2d(3.636, -2.437, new Rotation2d(Math.toRadians(180)));
 
     private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading(), position);
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka);

@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.Const;
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.TestDriveTrain;
 
 /**
  * RobotContainer
@@ -24,7 +23,7 @@ public class RobotContainer {
 
     public DriveTrain drive = new DriveTrain();
 
-    ArrayList<Command> commands = new ArrayList<Command>();
+    private ArrayList<Command> commands = new ArrayList<Command>();
 
     // TODO: create a dict of paths for a given autonomous mode
 
@@ -58,7 +57,7 @@ public class RobotContainer {
             }
         }
 
-        System.out.println("Paths successfully read");
+        System.out.println(trajectoryPaths.size() + " successfully loaded");
     }
 
     public Command getAutonomousCommand() {
@@ -66,12 +65,12 @@ public class RobotContainer {
                 new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka), drive.getDifferentialDriveKinematics(), 10);
 
         // TODO: update these
-        TrajectoryConfig config = new TrajectoryConfig(4, 4);
+        TrajectoryConfig config = new TrajectoryConfig(1, 1);
 
         config.addConstraint(autoVoltageConstraint);
         config.setKinematics(drive.getDifferentialDriveKinematics());
 
-        String trajectoryJSON = "paths/startmidclose3balltrench_.wpilib.json";
+        String trajectoryJSON = "paths/first.wpilib.json";
 
         try {
             Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
@@ -91,7 +90,15 @@ public class RobotContainer {
     }
 
     public Command getNextAutonomousCommand() {
-        return commands.remove(0);
+
+        System.out.println("retieving command, new size " + (commands.size()-1));
+
+        try {
+            return commands.remove(0);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("out of bounds exception size: " + commands.size());
+            return null;
+        }
     }
 
     public void TankDrive(double left, double right) {
@@ -110,6 +117,10 @@ public class RobotContainer {
 
     public void printGyroYaw() {
         drive.printYaw();
+    }
+
+    public ArrayList<Command> getCommands() {
+        return commands;
     }
 
 }

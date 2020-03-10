@@ -15,7 +15,7 @@ public class Vision {
         enableLEDS();
 
         double x = table.getEntry("tx").getDouble(0.0);
-        float Kp = -0.045f; // Proportional control constant
+        float Kp = -0.065f; // Proportional control constant
         double min_command = 0.2;
 
         double steering_adjust = 0;
