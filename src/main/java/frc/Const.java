@@ -74,4 +74,10 @@ public class Const {
     public final static double COLOR_RED_THRESHOLD = 7000;
     public final static double COLOR_GREEN_THRESHOLD = 13000;
     public final static double COLOR_ALPHA_THRESHOLD = 29192;
+
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // FIELD CONSTANTS
+    // ................................................................................................
+
+    public final static double FIELD_OUTER_PORT_WIDTH = 34.64;
 }

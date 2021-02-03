@@ -3,22 +3,22 @@ package frc.robot;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.Const;
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Turret;
 
 /**
  * RobotContainer
@@ -26,16 +26,15 @@ import frc.robot.subsystems.Turret;
 public class RobotContainer {
 
     public DriveTrain drive = new DriveTrain();
-    public Turret turret = new Turret();
-    public Intake intake = new Intake();
 
-    private ArrayList<Command> commands = new ArrayList<Command>();
 
     // TODO: create a dict of paths for a given autonomous mode
 
-    public void loadConfigs(ArrayList<String> trajectoryPaths) {
+    public ArrayList<Command> getConfigs(ArrayList<String> trajectoryPaths) {
 
         int index = 0;
+
+        ArrayList<Command> commands = new ArrayList<Command>();
 
         for (String path : trajectoryPaths) {
             Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(path);
@@ -48,25 +47,56 @@ public class RobotContainer {
                 //     System.out.println("INITIAL POSE " + drive.getPosition());
                 // }
 
+    //             var autoVoltageConstraint =
+    //     new DifferentialDriveVoltageConstraint(
+    //         new SimpleMotorFeedforward(DriveConstants.ksVolts,
+    //                                    DriveConstants.kvVoltSecondsPerMeter,
+    //                                    DriveConstants.kaVoltSecondsSquaredPerMeter),
+    //         DriveConstants.kDriveKinematics,
+    //         10);
+
+    // // Create config for trajectory
+    // TrajectoryConfig config =
+    //     new TrajectoryConfig(AutoConstants.kMaxSpeedMetersPerSecond,
+    //                          AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    //         // Add kinematics to ensure max speed is actually obeyed
+    //         .setKinematics(DriveConstants.kDriveKinematics)
+    //         // Apply the voltage constraint
+    //         .addConstraint(autoVoltageConstraint);
+
+    //             Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+    //     // Start at the origin facing the +X direction
+    //     new Pose2d(0, 0, new Rotation2d(0)),
+    //     // Pass through these two interior waypoints, making an 's' curve path
+    //     List.of(
+    //         new Translation2d(1, 1),
+    //         new Translation2d(2, -1)
+    //     ),
+    //     // End 3 meters straight ahead of where we started, facing forward
+    //     new Pose2d(3, 0, new Rotation2d(0)),
+    //     // Pass config
+    //     config
+    // );
+
                 RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
                 new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
                 drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
                 drive::setVolts, drive);
-                commands.add(new WaitCommand(1).andThen(() -> turret.shoot()).andThen(new WaitCommand(5)).andThen(()->turret.stop()).andThen(()->intake.setIntakePower(Const.INTAKE_SPEED)).andThen(()->intake.setSolenoid(true)));
 
+                
                 commands.add(command);
-
+                
                 index++;
-
+                
             } catch (IOException e) {
                 // TODO: handle this just in case maybe
                 System.out.println("Unable to open trajectory: " + path);
             }
         }
 
-        commands.add(new WaitCommand(10).andThen(()->turret.shoot()).andThen(new WaitCommand(5)));
-
         System.out.println(trajectoryPaths.size() + " successfully loaded");
+
+        return commands;
     }
 
     public Command getAutonomousCommand() {
@@ -79,7 +109,7 @@ public class RobotContainer {
         config.addConstraint(autoVoltageConstraint);
         config.setKinematics(drive.getDifferentialDriveKinematics());
 
-        String trajectoryJSON = "paths/first.wpilib.json";
+        String trajectoryJSON = "paths/straight.wpilib.json";
 
         try {
             Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
@@ -99,17 +129,17 @@ public class RobotContainer {
     }
 
 
-    public Command getNextAutonomousCommand() {
+    // public Command getNextAutonomousCommand() {
 
-        System.out.println("retieving command, new size " + (commands.size()-1));
+    //     System.out.println("retieving command, new size " + (commands.size()-1));
 
-        try {
-            return commands.remove(0);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("out of bounds exception size: " + commands.size());
-            return null;
-        }
-    }
+    //     try {
+    //         return commands.remove(0);
+    //     } catch (IndexOutOfBoundsException e) {
+    //         System.out.println("out of bounds exception size: " + commands.size());
+    //         return null;
+    //     }
+    // }
 
     public void TankDrive(double left, double right) {
         // drive.setVolts(left * 12, right * 12);
@@ -128,9 +158,4 @@ public class RobotContainer {
     public void printGyroYaw() {
         drive.printYaw();
     }
-
-    public ArrayList<Command> getCommands() {
-        return commands;
-    }
-
 }

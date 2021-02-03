@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.Const;
 
 /**
  * Vision
@@ -15,7 +16,7 @@ public class Vision {
         enableLEDS();
 
         double x = table.getEntry("tx").getDouble(0.0);
-        float Kp = -0.065f; // Proportional control constant
+        float Kp = -0.035f; // Proportional control constant
         double min_command = 0.2;
 
         double steering_adjust = 0;
@@ -29,6 +30,10 @@ public class Vision {
         return new double[] { -steering_adjust, -steering_adjust };
     }
 
+    /**
+     * 
+     * @return the distance to the found target in inches
+     */
     public static double getDistanceToTarget() {
         enableLEDS();
 
@@ -49,6 +54,20 @@ public class Vision {
         return (getNumber("ty") * -0.66303) - 1.8563;
     }
 
+    public static boolean isWithinLateralRange() {
+
+        // distance in inches
+        double distance = getDistanceToTarget();
+        double acceptableAngularOffset = Math.toDegrees(Math.tanh((Const.FIELD_OUTER_PORT_WIDTH / (2 * distance))));   
+        
+        // System.out.println("distance " + distance + " acceptable offset " + acceptableAngularOffset);
+
+        if(Math.abs(getNumber("tx")) < acceptableAngularOffset) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public static void setNumber(String entry, int number) {
         table.getEntry(entry).setNumber(number);

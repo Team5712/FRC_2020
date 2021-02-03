@@ -35,6 +35,6 @@ public class Intake {
     }
 
     public void setBackConveyorPower(double power) {
-        backConveyor.set(power);
+        backConveyor.set(-power);
     }
 }
