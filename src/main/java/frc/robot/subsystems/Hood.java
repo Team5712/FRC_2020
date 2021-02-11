@@ -21,14 +21,6 @@ public class Hood {
 
 
     public void setPower(double power) {
-        // if(encoder.getPosition() >= Const.HOOD_MAX_POSITION && power > 0) {
-        //     System.out.println("too far back");
-        //     power = 0;
-        // } else if(encoder.getPosition() <= Const.HOOD_MIN_POSITION && power < 0) {
-        //     power = 0;
-        //     System.out.println("too far foward");
-        //}
-        // TODO: check these again :(
 
         power = Math.max(Math.min(power, Const.HOOD_MAXOUTPUT), Const.HOOD_MINOUTPUT);
 
@@ -43,7 +35,6 @@ public class Hood {
 
         double error = this.getRelativePosition() - position;
         double power = Const.HOOD_Kp * error;
-        // System.out.println("err " + error);
         setPower(power);
     }
 

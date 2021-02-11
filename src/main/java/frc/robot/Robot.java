@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
 
         //trajectoryPaths.add("paths/startmidfar3balltrench_trench.wpilib.json");
         //trajectoryPaths.add("paths/startmidfar3balltrench_turn.wpilib.json");
-        trajectoryPaths.add("paths/straight.wpilib.json");
+        trajectoryPaths.add("paths/barrelpath.wpilib.json");
 
 
         this.commands = container.getConfigs(trajectoryPaths);
@@ -136,38 +136,7 @@ public class Robot extends TimedRobot {
         pathOne.schedule();
         // Command pathTwo = commands.get(1);
 
-        // SequentialCommandGroup autoCommand = new SequentialCommandGroup();
-        // ParallelCommandGroup secondaryCommand = new ParallelCommandGroup(autoCommand);
 
-        // secondaryCommand.addCommands(
-          
-        //         // rev up fly wheel, wait, then shoot for 2 seconds
-        //         new WaitCommand(0).andThen(() -> turret.shoot()).andThen(new WaitCommand(1.5))
-        //                 .andThen(() -> intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED))
-        //                 .andThen(() -> intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED))
-        //                 .andThen(new WaitCommand(2))
-        //                 // lower intake, and run intake based on sensor input
-        //                 .andThen(() -> intake.setSolenoid(true))
-        //                 .andThen(() -> turret.stop())
-        //                 .andThen(()->setVisionTrue()).andThen(pathOne).andThen(() -> intake.setIntakePower(0))
-        //                 .andThen(() -> intake.setBackConveyorPower(0)).andThen(pathTwo).andThen(() -> turret.shoot())
-        //                 .andThen(new WaitCommand(3))
-        //                 .andThen(() -> intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED))
-        //                 .andThen(() -> intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED)));
-
-        // commands.add(new WaitCommand(1).andThen(() -> turret.shoot()).andThen(new
-        // WaitCommand(5))
-        // .andThen(() -> turret.stop()).andThen(() ->
-        // intake.setIntakePower(Const.INTAKE_SPEED))
-        // .andThen(() -> intake.setSolenoid(true)));
-        // commands.add(new WaitCommand(10).andThen(() -> turret.shoot()).andThen(new
-        // WaitCommand(5)));
-
-        // if (pathOne != null) {
-        //     secondaryCommand.schedule();
-        // } else {
-        //     System.out.println("command is null!");
-        // }
     }
 
     @Override
@@ -178,101 +147,6 @@ public class Robot extends TimedRobot {
         // container.printGyroYaw();
         CommandScheduler.getInstance().run();
 
-        // switch (commandNumber) {
-        // shoot 3 balls
-        // case 0:
-
-        // turret.shoot();
-
-        // if (turret.getShooterError() < Const.INTAKE_BACK_CONVEYOR_THRESHOLD) {
-        // intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
-        // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-        // }
-
-        // if (autoTimer.get() > 3) {
-        // commandNumber++;
-        // }
-        // break;
-        // run intake
-        // case 1:
-        // System.out.println("running intake");
-        // CommandScheduler.getInstance().run();
-
-        // intake.setIntakePower(-Const.INTAKE_SPEED);
-
-        // intake.setSolenoid(true);
-        // intake.setBackConveyorPower(0);
-        // intake.setFrontConveyorPower(0);
-        // turret.stop();
-
-        // break;
-        // case 2:
-        // // System.out.println("finish intaking, going back");
-        // turret.shoot();
-
-        // if (turret.getShooterError() < Const.INTAKE_BACK_CONVEYOR_THRESHOLD) {
-        // intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
-        // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-        // }
-
-        // intake.setSolenoid(false);
-
-        // CommandScheduler.getInstance().run();
-        // break;
-        // case 3:
-        // // System.out.println("finished paths, shooting final balls");
-        // turret.stop();
-        // intake.setBackConveyorPower(0);
-        // intake.setFrontConveyorPower(0);
-        // break;
-        // default:
-        // System.out.println("invalid number " + commandNumber);
-        // break;
-        // }
-
-        // switch (commandNumber) {
-        // case 0:
-
-        // if (autoTimer.get() > 10) {
-        // turret.stop();
-        // commandNumber++;
-        // } else {
-
-        // if (autoTimer.get() > 3) {
-        // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-        // intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
-        // intake.setIntakePower(-Const.INTAKE_SPEED);
-        // }
-
-        // turret.shoot();
-        // }
-
-        // break;
-
-        // case 1:
-
-        // if (autoTimer.get() > 12) {
-        // commandNumber++;
-        // } else {
-        // turret.stop();
-        // container.drive.TankDrive(-0.55, 0.55);
-        // }
-
-        // break;
-
-        // case 2:
-        // intake.setIntakePower(0);
-        // intake.setFrontConveyorPower(0);
-        // intake.setBackConveyorPower(0);
-
-        // container.TankDrive(0, 0);
-        // turret.stop();
-
-        // break;
-
-        // default:
-        // System.out.println("invalid command number: " + commandNumber);
-        // }
     }
 
     @Override

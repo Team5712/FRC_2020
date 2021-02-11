@@ -29,11 +29,6 @@ import frc.robot.RoboMath;
  */
 public class DriveTrain extends SubsystemBase {
 
-    // private WPI_TalonSRX leftMaster = new WPI_TalonSRX(1);
-    // private WPI_TalonSRX leftSlave = new WPI_TalonSRX(2);
-
-    // private WPI_TalonSRX rightMaster = new WPI_TalonSRX(5);
-    // private WPI_TalonSRX rightSlave = new WPI_TalonSRX(6);
 
      private CANSparkMax leftMaster = new CANSparkMax(1, MotorType.kBrushless);
      private CANSparkMax leftSlave = new CANSparkMax(2, MotorType.kBrushless);
@@ -53,7 +48,7 @@ public class DriveTrain extends SubsystemBase {
 
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Const.TRACK_WIDTH);
 
-    private Pose2d position = new Pose2d(1.719058397041077,-2.6891488855016847, new Rotation2d(Math.toRadians(0)));
+    private Pose2d position = new Pose2d(1.270458547423969, 2.082510762394112, new Rotation2d(0.23040243605886168));
 
     private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading(), position);
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka);

@@ -60,7 +60,6 @@ public class Vision {
         double distance = getDistanceToTarget();
         double acceptableAngularOffset = Math.toDegrees(Math.tanh((Const.FIELD_OUTER_PORT_WIDTH / (2 * distance))));   
         
-        // System.out.println("distance " + distance + " acceptable offset " + acceptableAngularOffset);
 
         if(Math.abs(getNumber("tx")) < acceptableAngularOffset) {
             return true;

@@ -42,41 +42,7 @@ public class RobotContainer {
 
                 Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
                 
-                // if(index == 0) {
-                //     drive.setPosition(trajectory.getInitialPose());
-                //     System.out.println("INITIAL POSE " + drive.getPosition());
-                // }
-
-    //             var autoVoltageConstraint =
-    //     new DifferentialDriveVoltageConstraint(
-    //         new SimpleMotorFeedforward(DriveConstants.ksVolts,
-    //                                    DriveConstants.kvVoltSecondsPerMeter,
-    //                                    DriveConstants.kaVoltSecondsSquaredPerMeter),
-    //         DriveConstants.kDriveKinematics,
-    //         10);
-
-    // // Create config for trajectory
-    // TrajectoryConfig config =
-    //     new TrajectoryConfig(AutoConstants.kMaxSpeedMetersPerSecond,
-    //                          AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-    //         // Add kinematics to ensure max speed is actually obeyed
-    //         .setKinematics(DriveConstants.kDriveKinematics)
-    //         // Apply the voltage constraint
-    //         .addConstraint(autoVoltageConstraint);
-
-    //             Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-    //     // Start at the origin facing the +X direction
-    //     new Pose2d(0, 0, new Rotation2d(0)),
-    //     // Pass through these two interior waypoints, making an 's' curve path
-    //     List.of(
-    //         new Translation2d(1, 1),
-    //         new Translation2d(2, -1)
-    //     ),
-    //     // End 3 meters straight ahead of where we started, facing forward
-    //     new Pose2d(3, 0, new Rotation2d(0)),
-    //     // Pass config
-    //     config
-    // );
+                
 
                 RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
                 new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),

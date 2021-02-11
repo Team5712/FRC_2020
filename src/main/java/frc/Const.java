@@ -17,8 +17,6 @@ public class Const {
     // ................................................................................................
     public static final double HOOD_MAX_POSITION = 23.5;
     public static final double HOOD_MIN_POSITION = -10;
-    // old old 3.928568124771118 with 10,000 rpm
-    // 2.500006675720215 old
     public static final double HOOD_CONTROL_PANEL_POSITION = 2.90;
     public static final double HOOD_LINE_POSITION = 0;
     public static final double HOOD_TRENCH_POSITION = 2.2857134491205215;
