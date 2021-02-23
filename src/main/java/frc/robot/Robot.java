@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
 
         //trajectoryPaths.add("paths/startmidfar3balltrench_trench.wpilib.json");
         //trajectoryPaths.add("paths/startmidfar3balltrench_turn.wpilib.json");
-        trajectoryPaths.add("paths/barrelpath.wpilib.json");
+        trajectoryPaths.add("paths/output/Bounce.wpilib.json");
 
 
         this.commands = container.getConfigs(trajectoryPaths);
@@ -187,57 +187,57 @@ public class Robot extends TimedRobot {
         // .............................................................................
 
         // run intake in and out
-        if (rightJoystick.getRawButtonPressed(2)) {
-            isIntaking = !isIntaking;
-        }
+        // if (rightJoystick.getRawButtonPressed(2)) {
+        //     isIntaking = !isIntaking;
+        // }
 
-        if (isIntaking) {
-            intake.setIntakePower(-Const.INTAKE_SPEED);
-            intake.setSolenoid(true);
+        // if (isIntaking) {
+        //     intake.setIntakePower(-Const.INTAKE_SPEED);
+        //     intake.setSolenoid(true);
 
-            // if they aren't reversing
-        } else {
-            intake.setIntakePower(0);
-            intake.setSolenoid(false);
-        }
+        //     // if they aren't reversing
+        // } else {
+        //     intake.setIntakePower(0);
+        //     intake.setSolenoid(false);
+        // }
 
-        // left joystick left button disable color sensor
-        if (leftJoystick.getRawButtonPressed(2)) {
-            isColorSensorActive = !isColorSensorActive;
-        }
+        // // left joystick left button disable color sensor
+        // if (leftJoystick.getRawButtonPressed(2)) {
+        //     isColorSensorActive = !isColorSensorActive;
+        // }
 
-        double red = colorSensor.getRed();
-        double green = colorSensor.getGreen();
-        double blue = colorSensor.getBlue();
+        // double red = colorSensor.getRed();
+        // double green = colorSensor.getGreen();
+        // double blue = colorSensor.getBlue();
 
-        double alpha = red + green + blue / (1);
+        // double alpha = red + green + blue / (1);
 
-        // left joystick middle button reverse WHILE intaking
-        if (leftJoystick.getRawButton(4)) {
-            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
-            intake.setIntakePower(Const.INTAKE_SPEED);
-            intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
-        } else if (leftJoystick.getRawButton(3)) {
-            intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-            // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
-        } else if (IRSensor.get() && isColorSensorActive && isIntaking) {
-            IRSensorTimer.start();
-            isIRConveyorRunning = true;
-        } else {
-            intake.setFrontConveyorPower(0);
-            // System.out.println("red " + colorSensor.getRed() + " green " +
-            // colorSensor.getGreen() + " alpha " + alpha);
-        }
+        // // left joystick middle button reverse WHILE intaking
+        // if (leftJoystick.getRawButton(4)) {
+        //     intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+        //     intake.setIntakePower(Const.INTAKE_SPEED);
+        //     intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+        // } else if (leftJoystick.getRawButton(3)) {
+        //     intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
+        //     // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
+        // } else if (IRSensor.get() && isColorSensorActive && isIntaking) {
+        //     IRSensorTimer.start();
+        //     isIRConveyorRunning = true;
+        // } else {
+        //     intake.setFrontConveyorPower(0);
+        //     // System.out.println("red " + colorSensor.getRed() + " green " +
+        //     // colorSensor.getGreen() + " alpha " + alpha);
+        // }
 
-        if (isIRConveyorRunning && IRSensorTimer.get() < .4) {
-            // System.out.println("running timer " + IRSensorTimer.get());
-            intake.setFrontConveyorPower(-0.5);
-        } else if (!leftJoystick.getRawButton(3) && !leftJoystick.getRawButton(4)) {
-            isIRConveyorRunning = false;
-            intake.setFrontConveyorPower(0);
-        }
+        // if (isIRConveyorRunning && IRSensorTimer.get() < .4) {
+        //     // System.out.println("running timer " + IRSensorTimer.get());
+        //     intake.setFrontConveyorPower(-0.5);
+        // } else if (!leftJoystick.getRawButton(3) && !leftJoystick.getRawButton(4)) {
+        //     isIRConveyorRunning = false;
+        //     intake.setFrontConveyorPower(0);
+        // }
 
-        System.out.println(container.drive.getPosition());
+        // System.out.println(container.drive.getPosition());
 
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // Drive Handling
