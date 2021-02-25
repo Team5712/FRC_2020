@@ -48,7 +48,7 @@ public class DriveTrain extends SubsystemBase {
 
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Const.TRACK_WIDTH);
 
-    private Pose2d position = new Pose2d(0.85, -2.286, new Rotation2d(0.00));
+    private Pose2d position = new Pose2d(0.762, -3.81, new Rotation2d(0.00));
 
     private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading(), position);
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka);
@@ -98,7 +98,7 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void periodic() {
         position = odometry.update(getHeading(), RoboMath.ticksToMeters(leftEncoder.getPosition()), RoboMath.ticksToMeters(rightEncoder.getPosition()));
-        System.out.println(position);
+        //System.out.println(position);
     }
 
     public DifferentialDriveWheelSpeeds getWheelSpeeds() {
@@ -183,5 +183,9 @@ public class DriveTrain extends SubsystemBase {
 
     public void setPosition(Pose2d position) {
         this.position  = position;
+    }
+
+    public void resetRobotPosition(Pose2d position, Rotation2d rotation) {
+        odometry.resetPosition(position, rotation);
     }
 }

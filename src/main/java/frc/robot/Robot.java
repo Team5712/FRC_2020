@@ -86,17 +86,9 @@ public class Robot extends TimedRobot {
         System.out.println("Starting robot");
 
         container = new RobotContainer();
-        chooser.addOption("straight", "2021InfiniteRechargeSlalomPath");
-        chooser.addOption("startmidclose3balltrench", "startmidclose3balltrench");
-        // chooser.addOption("startright3balltrench", "startright3balltrench");
-        chooser.addOption("startmidfar3balltrench", "startmidfar3balltrench");
-        // chooser.addOption("startmidfar5balltrench", "startmidfar5balltrench");
-        // chooser.addOption("startmidclose5balltrench", "startmidclose5balltrench");
-        // chooser.addOption("startmidright5balltrench", "startmidright5balltrench");
-        // chooser.addOption("startmidclose2ballren", "startmidclose2ballren");
-        // chooser.addOption("startmidclose3ballren", "startmidclose3ballren");
-        // chooser.addOption("startleft2balltrench", "startleft2balltrench");
-        // chooser.addOption("Cit_Circuits", "Cit_Circuits");
+        chooser.addOption("slalompath3.0", "paths/output/slalom.wpilib.json");
+        chooser.addOption("barrelracing", "paths/output/barrelracing.wpilib.json");
+        chooser.addOption("Bounce", "paths/output/Bounce.wpilib.json");
         SmartDashboard.putData("Auto Mode", chooser);
 
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -108,15 +100,12 @@ public class Robot extends TimedRobot {
         ArrayList<String> trajectoryPaths = new ArrayList<String>();
 
         if (chooser.getSelected() == null || chooser.getSelected().isEmpty()) {
-            System.out.println("dashboard is null!");
-            autoSelection = "startmidfar3balltrench";
+            autoSelection = "paths/output/Bounce.wpilib.json";
         } else {
             autoSelection = chooser.getSelected();
         }
 
-        //trajectoryPaths.add("paths/startmidfar3balltrench_trench.wpilib.json");
-        //trajectoryPaths.add("paths/startmidfar3balltrench_turn.wpilib.json");
-        trajectoryPaths.add("paths/output/Bounce.wpilib.json");
+        trajectoryPaths.add("paths/output/slalom.wpilib.json");
 
 
         this.commands = container.getConfigs(trajectoryPaths);

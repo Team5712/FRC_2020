@@ -41,8 +41,8 @@ public class RobotContainer {
             try {
 
                 Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-                
-                
+            
+                // drive.resetRobotPosition(trajectory.getInitialPose(), trajectory.getInitialPose().getRotation());
 
                 RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
                 new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
