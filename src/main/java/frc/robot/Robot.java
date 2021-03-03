@@ -80,6 +80,7 @@ public class Robot extends TimedRobot {
 
     ArrayList<Command> commands = new ArrayList<Command>();
 
+
     @Override
     public void robotInit() {
 
@@ -96,34 +97,46 @@ public class Robot extends TimedRobot {
         // group and load them
         // ....................................................................................................
 
-        String autoSelection = "";
         ArrayList<String> trajectoryPaths = new ArrayList<String>();
 
-        if (chooser.getSelected() == null || chooser.getSelected().isEmpty()) {
-            autoSelection = "paths/output/Bounce.wpilib.json";
-        } else {
-            autoSelection = chooser.getSelected();
-        }
+        // if (chooser.getSelected() == null || chooser.getSelected().isEmpty()) {
+        //     autoSelection = "paths/output/Bounce.wpilib.json";
+        // } else {
+        //     autoSelection = chooser.getSelected();
+        // }
 
         trajectoryPaths.add("paths/output/slalom.wpilib.json");
 
 
         this.commands = container.getConfigs(trajectoryPaths);
+        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
+        
     }
 
     @Override
     public void autonomousInit() {
         container.resetSensors();
-        System.out.println("Autonomous has started");
+        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
+        // System.out.println("Autonomous has started");
 
         autoTimer.start();
 
-        // alright, this is going to be disgusting, but everything will be
-        // added into one huge command
+        // // alright, this is going to be disgusting, but everything will be
+        // // added into one huge command
 
+        // Command pathOne = this.commands.get(0);
+        // pathOne.schedule();
+        // Command pathTwo = commands.get(1);
+
+        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
+        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
         Command pathOne = this.commands.get(0);
         pathOne.schedule();
-        // Command pathTwo = commands.get(1);
+
+        // schedule the autonomous command (example)
+        // if (command != null) {
+        //     command.schedule();
+        // }
 
 
     }
@@ -175,55 +188,69 @@ public class Robot extends TimedRobot {
         // Intake
         // .............................................................................
 
-        // run intake in and out
-        // if (rightJoystick.getRawButtonPressed(2)) {
-        //     isIntaking = !isIntaking;
-        // }
+        //run intake in and out
+        if (rightJoystick.getRawButtonPressed(2)) {
+            isIntaking = !isIntaking;
+        }
 
-        // if (isIntaking) {
-        //     intake.setIntakePower(-Const.INTAKE_SPEED);
-        //     intake.setSolenoid(true);
+        if (isIntaking) {
+            intake.setIntakePower(-Const.INTAKE_SPEED);
+            intake.setSolenoid(true);
 
-        //     // if they aren't reversing
-        // } else {
-        //     intake.setIntakePower(0);
-        //     intake.setSolenoid(false);
-        // }
+            // if they aren't reversing
+        } else {
+            intake.setIntakePower(0);
+            intake.setSolenoid(false);
+        }
 
-        // // left joystick left button disable color sensor
-        // if (leftJoystick.getRawButtonPressed(2)) {
-        //     isColorSensorActive = !isColorSensorActive;
-        // }
+        // left joystick left button disable color sensor
+        if (leftJoystick.getRawButtonPressed(2)) {
+            isColorSensorActive = !isColorSensorActive;
+        }
 
-        // double red = colorSensor.getRed();
-        // double green = colorSensor.getGreen();
-        // double blue = colorSensor.getBlue();
+        double red = colorSensor.getRed();
+        double green = colorSensor.getGreen();
+        double blue = colorSensor.getBlue();
 
-        // double alpha = red + green + blue / (1);
+        double alpha = red + green + blue / (1);
 
-        // // left joystick middle button reverse WHILE intaking
-        // if (leftJoystick.getRawButton(4)) {
-        //     intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
-        //     intake.setIntakePower(Const.INTAKE_SPEED);
-        //     intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
-        // } else if (leftJoystick.getRawButton(3)) {
-        //     intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-        //     // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
-        // } else if (IRSensor.get() && isColorSensorActive && isIntaking) {
-        //     IRSensorTimer.start();
-        //     isIRConveyorRunning = true;
+        
+        // left joystick middle button reverse WHILE intaking
+        if (leftJoystick.getRawButton(4)) {
+            intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+            intake.setIntakePower(Const.INTAKE_SPEED);
+            intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+        } else if (leftJoystick.getRawButton(3)) {
+            intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
+            // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
+        } else if (!IRSensor.get() && isColorSensorActive && isIntaking) {
+            IRSensorTimer.start();
+            isIRConveyorRunning = true;
+        } else {
+            intake.setFrontConveyorPower(0);
+            
+            // System.out.println("red " + colorSensor.getRed() + " green " +
+            // colorSensor.getGreen() + " alpha " + alpha);
+        }
+
+        if (isIRConveyorRunning && IRSensorTimer.get() < .4) {
+            // System.out.println("running timer " + IRSensorTimer.get());
+            intake.setFrontConveyorPower(0.5);
+        } else if (!leftJoystick.getRawButton(3) && !leftJoystick.getRawButton(4)) {
+            isIRConveyorRunning = false;
+            intake.setFrontConveyorPower(0);
+        }
+
+        // if(IRSensor.get()) {
+        //     intake.setFrontConveyorPower(0.5);
         // } else {
         //     intake.setFrontConveyorPower(0);
-        //     // System.out.println("red " + colorSensor.getRed() + " green " +
-        //     // colorSensor.getGreen() + " alpha " + alpha);
         // }
 
-        // if (isIRConveyorRunning && IRSensorTimer.get() < .4) {
-        //     // System.out.println("running timer " + IRSensorTimer.get());
+        System.out.println(IRSensor.get());
+
+        // if(IRSensor.get()) {
         //     intake.setFrontConveyorPower(-0.5);
-        // } else if (!leftJoystick.getRawButton(3) && !leftJoystick.getRawButton(4)) {
-        //     isIRConveyorRunning = false;
-        //     intake.setFrontConveyorPower(0);
         // }
 
         // System.out.println(container.drive.getPosition());
@@ -331,7 +358,7 @@ public class Robot extends TimedRobot {
         intake.setIntakePower(-Const.INTAKE_SPEED);
 
         // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
-        if (IRSensor.get() && isColorSensorActive) {
+        if (!IRSensor.get() && isColorSensorActive) {
             IRSensorTimer.start();
             isIRConveyorRunning = true;
         } else {

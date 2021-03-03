@@ -25,7 +25,7 @@ public class Const {
     public static final double HOOD_MINOUTPUT = -0.1;
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // TURRET CONSTANTS
+    // TURRET CONSTANTS 
     // ................................................................................................
 
     public static final double TURRET_YAW_RATE = 0.1;
@@ -78,4 +78,13 @@ public class Const {
     // ................................................................................................
 
     public final static double FIELD_OUTER_PORT_WIDTH = 34.64;
+
+
+    public static final class AutoConstants {
+        public static final double kMaxSpeedMetersPerSecond = 3;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    
+        public static final double kRamseteB = 2;
+        public static final double kRamseteZeta = 0.7;
+      }
 }

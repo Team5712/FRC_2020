@@ -30,8 +30,8 @@ import frc.robot.RoboMath;
 public class DriveTrain extends SubsystemBase {
 
 
-     private CANSparkMax leftMaster = new CANSparkMax(1, MotorType.kBrushless);
-     private CANSparkMax leftSlave = new CANSparkMax(2, MotorType.kBrushless);
+    private CANSparkMax leftMaster = new CANSparkMax(1, MotorType.kBrushless);
+    private CANSparkMax leftSlave = new CANSparkMax(2, MotorType.kBrushless);
 
     private CANSparkMax rightMaster = new CANSparkMax(3, MotorType.kBrushless);
     private CANSparkMax rightSlave = new CANSparkMax(4, MotorType.kBrushless);
@@ -53,8 +53,8 @@ public class DriveTrain extends SubsystemBase {
     private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading(), position);
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka);
 
-    private PIDController leftPidController = new PIDController(Const.Kp, Const.Kd, 0); // .835
-    private PIDController rightPidController = new PIDController(Const.Kp, Const.Kd, 0); // .835
+    private PIDController leftPidController = new PIDController(Const.Kp, Const.Kd, 0);
+    private PIDController rightPidController = new PIDController(Const.Kp, Const.Kd, 0);
 
     public DriveTrain() {
         
@@ -68,10 +68,10 @@ public class DriveTrain extends SubsystemBase {
         rightMaster.setIdleMode(IdleMode.kCoast);
         rightSlave.setIdleMode(IdleMode.kCoast);
 
-         leftSlave.follow(leftMaster);
-         rightSlave.follow(rightMaster);
+        leftSlave.follow(leftMaster);
+        rightSlave.follow(rightMaster);
         
-         leftMaster.setInverted(true);
+        leftMaster.setInverted(true);
         rightMaster.setInverted(false);
 
         drive = new DifferentialDrive(leftMaster, rightMaster);
@@ -98,7 +98,6 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void periodic() {
         position = odometry.update(getHeading(), RoboMath.ticksToMeters(leftEncoder.getPosition()), RoboMath.ticksToMeters(rightEncoder.getPosition()));
-        //System.out.println(position);
     }
 
     public DifferentialDriveWheelSpeeds getWheelSpeeds() {
@@ -185,7 +184,13 @@ public class DriveTrain extends SubsystemBase {
         this.position  = position;
     }
 
-    public void resetRobotPosition(Pose2d position, Rotation2d rotation) {
-        odometry.resetPosition(position, rotation);
+    /**
+     * Resets the odometry to the specified pose.
+     *
+     * @param pose The pose to which to set the odometry.
+     */
+    public void resetOdometry(Pose2d pose) {
+        resetEncoders();
+        odometry.resetPosition(pose, Rotation2d.fromDegrees(-gyro.getAngle()));
     }
 }

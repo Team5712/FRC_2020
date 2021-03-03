@@ -27,12 +27,7 @@ public class RobotContainer {
 
     public DriveTrain drive = new DriveTrain();
 
-
-    // TODO: create a dict of paths for a given autonomous mode
-
     public ArrayList<Command> getConfigs(ArrayList<String> trajectoryPaths) {
-
-        int index = 0;
 
         ArrayList<Command> commands = new ArrayList<Command>();
 
@@ -41,21 +36,15 @@ public class RobotContainer {
             try {
 
                 Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-            
-                // drive.resetRobotPosition(trajectory.getInitialPose(), trajectory.getInitialPose().getRotation());
 
                 RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
                 new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
                 drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
                 drive::setVolts, drive);
-
                 
                 commands.add(command);
                 
-                index++;
-                
             } catch (IOException e) {
-                // TODO: handle this just in case maybe
                 System.out.println("Unable to open trajectory: " + path);
             }
         }
@@ -65,33 +54,30 @@ public class RobotContainer {
         return commands;
     }
 
-    public Command getAutonomousCommand() {
-        var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
-                new SimpleMotorFeedforward(Const.Ks, Const.Kv, Const.Ka), drive.getDifferentialDriveKinematics(), 10);
-
-        // TODO: update these
-        TrajectoryConfig config = new TrajectoryConfig(1, 1);
-
-        config.addConstraint(autoVoltageConstraint);
-        config.setKinematics(drive.getDifferentialDriveKinematics());
-
-        String trajectoryJSON = "paths/straight.wpilib.json";
+    public Command getAutonomousCommand(String trajectoryJSON) {
 
         try {
+
             Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
             Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
 
-            RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition, new RamseteController(2.0, .7),
-                    drive.getFeedFoward(), drive.getDifferentialDriveKinematics(), drive::getWheelSpeeds,
-                    drive.getLeftPIDController(), drive.getRightPIDController(), drive::setVolts, drive);
+            RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
+            new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
+            drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
+            drive::setVolts, drive);
+    
 
-            return command.andThen(() -> drive.setVolts(0, 0));
-        } catch (IOException ex) {
+            // Reset odometry to the starting pose of the trajectory.
+            drive.resetOdometry(trajectory.getInitialPose());
+
+            // Run path following command, then stop at the end.
+            return command;
+
+        } catch (IOException e) {
             System.out.println("Unable to open trajectory: " + trajectoryJSON);
+            return null;
         }
 
-        // TODO: return empty command to set motors to 0, 0
-        return null;
     }
 
 
