@@ -105,7 +105,7 @@ public class Robot extends TimedRobot {
         //     autoSelection = chooser.getSelected();
         // }
 
-        trajectoryPaths.add("paths/output/slalom.wpilib.json");
+        trajectoryPaths.add("paths/output/Bounce.wpilib.json");
 
 
         this.commands = container.getConfigs(trajectoryPaths);
