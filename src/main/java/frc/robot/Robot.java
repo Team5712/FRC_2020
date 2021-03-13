@@ -8,22 +8,18 @@
 package frc.robot;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
-import com.revrobotics.ColorSensorV3;
+import javax.swing.GroupLayout.SequentialGroup;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.Const;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hood;
@@ -49,8 +45,6 @@ public class Robot extends TimedRobot {
     public Joystick auxJoystick = new Joystick(2);
     public String autonMode = "";
 
-    private int commandNumber = 0;
-
     private Vision vision = new Vision();
     private Climber climber = new Climber();
     private Intake intake = new Intake();
@@ -59,9 +53,7 @@ public class Robot extends TimedRobot {
     private RobotContainer container;
 
     Turret turret = new Turret();
-    SendableChooser<String> chooser = new SendableChooser<String>();
 
-    private Timer autoTimer = new Timer();
     private Timer IRSensorTimer = new Timer();
     private Timer conveyorReverseTimer = new Timer();
 
@@ -72,73 +64,21 @@ public class Robot extends TimedRobot {
     private boolean isIRConveyorRunning = false;
     private DigitalInput IRSensor = new DigitalInput(0);
 
-    // TODO: remove these
-    private final I2C.Port i2cPort = I2C.Port.kOnboard;
-    private final ColorSensorV3 colorSensor = new ColorSensorV3(i2cPort);
-
-    private boolean runIntake = false;
-
-    ArrayList<Command> commands = new ArrayList<Command>();
-
 
     @Override
     public void robotInit() {
-
-        System.out.println("Starting robot");
-
         container = new RobotContainer();
-        chooser.addOption("slalompath3.0", "paths/output/slalom.wpilib.json");
-        chooser.addOption("barrelracing", "paths/output/barrelracing.wpilib.json");
-        chooser.addOption("Bounce", "paths/output/Bounce.wpilib.json");
-        SmartDashboard.putData("Auto Mode", chooser);
-
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        // Look for every path inside of our path folder prefixed with the appropriate
-        // group and load them
-        // ....................................................................................................
-
-        ArrayList<String> trajectoryPaths = new ArrayList<String>();
-
-        // if (chooser.getSelected() == null || chooser.getSelected().isEmpty()) {
-        //     autoSelection = "paths/output/Bounce.wpilib.json";
-        // } else {
-        //     autoSelection = chooser.getSelected();
-        // }
-
-        trajectoryPaths.add("paths/output/Bounce.wpilib.json");
-
-
-        this.commands = container.getConfigs(trajectoryPaths);
-        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
-        
     }
 
     @Override
     public void autonomousInit() {
-        container.resetSensors();
-        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
-        // System.out.println("Autonomous has started");
 
-        autoTimer.start();
+        Command autonomousCommand = container.getAutonomousCommand();
 
-        // // alright, this is going to be disgusting, but everything will be
-        // // added into one huge command
-
-        // Command pathOne = this.commands.get(0);
-        // pathOne.schedule();
-        // Command pathTwo = commands.get(1);
-
-        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
-        // this.commands.add(container.getAutonomousCommand("paths/output/slalom.wpilib.json"));
-        Command pathOne = this.commands.get(0);
-        pathOne.schedule();
-
-        // schedule the autonomous command (example)
-        // if (command != null) {
-        //     command.schedule();
-        // }
-
-
+        if (autonomousCommand != null) {
+            autonomousCommand.schedule();
+        }
+        
     }
 
     @Override
@@ -146,9 +86,9 @@ public class Robot extends TimedRobot {
         // if(runIntake=true){
         //     intakeSensor();
         // }
-        // container.printGyroYaw();
-        CommandScheduler.getInstance().run();
 
+        container.drive.printYaw();
+        CommandScheduler.getInstance().run();
     }
 
     @Override
@@ -208,12 +148,6 @@ public class Robot extends TimedRobot {
             isColorSensorActive = !isColorSensorActive;
         }
 
-        double red = colorSensor.getRed();
-        double green = colorSensor.getGreen();
-        double blue = colorSensor.getBlue();
-
-        double alpha = red + green + blue / (1);
-
         
         // left joystick middle button reverse WHILE intaking
         if (leftJoystick.getRawButton(4)) {
@@ -247,7 +181,7 @@ public class Robot extends TimedRobot {
         //     intake.setFrontConveyorPower(0);
         // }
 
-        System.out.println(IRSensor.get());
+        //System.out.println(IRSensor.get());
 
         // if(IRSensor.get()) {
         //     intake.setFrontConveyorPower(-0.5);
@@ -374,21 +308,6 @@ public class Robot extends TimedRobot {
             isIRConveyorRunning = false;
             intake.setFrontConveyorPower(0);
         }
-    }
-
-    @Override
-    public void testInit() {
-    }
-
-    @Override
-    public void testPeriodic() {
-    }
-
-    public void setVisionTrue(){
-        runIntake=true;
-    }
-    public void setVisionFalse(){
-        runIntake=false;
     }
 
 }

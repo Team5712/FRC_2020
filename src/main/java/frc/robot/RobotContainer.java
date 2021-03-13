@@ -1,23 +1,20 @@
 package frc.robot;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.controller.RamseteController;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
-import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
-import frc.Const;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.DriveTrain;
 
 /**
@@ -27,58 +24,140 @@ public class RobotContainer {
 
     public DriveTrain drive = new DriveTrain();
 
-    public ArrayList<Command> getConfigs(ArrayList<String> trajectoryPaths) {
+    SendableChooser<ArrayList<String>> chooser = new SendableChooser<ArrayList<String>>();
+    HashMap<String, Trajectory> pathweaverTrajectories = new HashMap<String, Trajectory>();
+    HashMap<String, Command> pathweaverCommands = new HashMap<String, Command>();
 
-        ArrayList<Command> commands = new ArrayList<Command>();
+    public RobotContainer() {
 
-        for (String path : trajectoryPaths) {
-            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(path);
-            try {
+        /**
+         *  Generate trajectories for all files in deploy path. It is recommended to 
+         *  generate trajectories on startup.
+         * */ 
+        File folder = Filesystem.getDeployDirectory().toPath().resolve("paths/output").toFile();
+        File[] listOfFiles = folder.listFiles();
 
-                Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                try {
+                    Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(listOfFiles[i].toPath());
+        
+                    RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
+                    new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
+                    drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
+                    drive::setVolts, drive);
 
-                RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
-                new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
-                drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
-                drive::setVolts, drive);
-                
-                commands.add(command);
-                
-            } catch (IOException e) {
-                System.out.println("Unable to open trajectory: " + path);
-            }
+                    System.out.println(listOfFiles[i].getName());
+
+                    pathweaverTrajectories.put(listOfFiles[i].getName(), trajectory);
+                    pathweaverCommands.put(listOfFiles[i].getName(), command);
+        
+                    
+                } catch (IOException e) {
+                    System.out.println("Unable to open trajectory: " + listOfFiles[i].getName());
+                }
+            } 
         }
 
-        System.out.println(trajectoryPaths.size() + " successfully loaded");
+        /**
+         *  Define a list of selections to choose an autonomous path. 
+         * */ 
+        ArrayList<String> straightPath = new ArrayList<String>();
+        straightPath.add("straight.wpilib.json");
+        chooser.setDefaultOption("Straight Path", straightPath);
 
-        return commands;
+        ArrayList<String> slalomPath = new ArrayList<String>();
+        slalomPath.add("slalom.wpilib.json");
+        chooser.addOption("Slalom Path", slalomPath);
+
+        ArrayList<String> barrelRacingPath = new ArrayList<String>();
+        barrelRacingPath.add("barrelracing.wpilib.json");
+        chooser.addOption("Barrel Racing Path", barrelRacingPath);
+
+        ArrayList<String> bouncePath = new ArrayList<String>();
+        bouncePath.add("Bounce.wpilib.json");
+        bouncePath.add("Bounce_0.wpilib.json");
+        bouncePath.add("Bounce_2.wpilib.json");
+        bouncePath.add("Bounce_1.wpilib.json");
+        chooser.addOption("Bounce Path", bouncePath);
+
+        SmartDashboard.putData("Auto Mode", chooser);
+
     }
 
-    public Command getAutonomousCommand(String trajectoryJSON) {
+    public Command getAutonomousCommand() {
 
-        try {
+        System.out.println(chooser.getSelected());
+        
+        drive.resetOdometry(pathweaverTrajectories.get(chooser.getSelected().get(0)).getInitialPose());
+        
+        SequentialCommandGroup autonPaths = new SequentialCommandGroup();
+		for(String paths: chooser.getSelected()) {
+            autonPaths.addCommands(pathweaverCommands.get(paths));
+        }
+        return autonPaths;
+    }
 
-            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
-            Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
 
-            RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
-            new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
-            drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
-            drive::setVolts, drive);
+    // private ArrayList<Command> getConfigs(ArrayList<String> trajectoryPaths) {
+
+    //     ArrayList<Command> commands = new ArrayList<Command>();
+
+    //     for(int i = 0; i < trajectoryPaths.size(); i++) {
+
+    //         String path = trajectoryPaths.get(i);
+    //         Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(path);
+
+    //         try {
+    //             Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+    //             RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
+    //             new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
+    //             drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
+    //             drive::setVolts, drive);
+
+    //             // Reset odometry to the starting pose of the trajectory.
+    //             // if (i == 0) {
+    //             //     drive.resetOdometry(trajectory.getInitialPose());
+    //             // }
+               
+    //             commands.add(command);
+                
+    //         } catch (IOException e) {
+    //             System.out.println("Unable to open trajectory: " + path);
+    //         }
+    //     }
+
+    //     System.out.println(trajectoryPaths.size() + " successfully loaded");
+
+    //     return commands;
+    // }
+
+    // public Command getAutonomousCommand(String trajectoryJSON) {
+
+    //     try {
+
+    //         Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+    //         Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+    //         RamseteCommand command = new RamseteCommand(trajectory, drive::getPosition,
+    //         new RamseteController(2.0, .7), drive.getFeedFoward(), drive.getDifferentialDriveKinematics(),
+    //         drive::getWheelSpeeds, drive.getLeftPIDController(), drive.getRightPIDController(),
+    //         drive::setVolts, drive);
     
 
-            // Reset odometry to the starting pose of the trajectory.
-            drive.resetOdometry(trajectory.getInitialPose());
+    //         // Reset odometry to the starting pose of the trajectory.
+    //         drive.resetOdometry(trajectory.getInitialPose());
 
-            // Run path following command, then stop at the end.
-            return command;
+    //         // Run path following command, then stop at the end.
+    //         return command;
 
-        } catch (IOException e) {
-            System.out.println("Unable to open trajectory: " + trajectoryJSON);
-            return null;
-        }
+    //     } catch (IOException e) {
+    //         System.out.println("Unable to open trajectory: " + trajectoryJSON);
+    //         return null;
+    //     }
 
-    }
+    // }
 
 
     // public Command getNextAutonomousCommand() {
@@ -94,7 +173,6 @@ public class RobotContainer {
     // }
 
     public void TankDrive(double left, double right) {
-        // drive.setVolts(left * 12, right * 12);
         drive.TankDrive(left, right);
     }
 
