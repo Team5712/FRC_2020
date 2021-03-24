@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import javax.swing.GroupLayout.SequentialGroup;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.I2C;
@@ -52,7 +53,7 @@ public class Robot extends TimedRobot {
 
     private RobotContainer container;
 
-    Turret turret = new Turret();
+    private Turret turret = new Turret();
 
     private Timer IRSensorTimer = new Timer();
     private Timer conveyorReverseTimer = new Timer();
@@ -63,6 +64,9 @@ public class Robot extends TimedRobot {
     private boolean isConveyorReversed = true;
     private boolean isIRConveyorRunning = false;
     private DigitalInput IRSensor = new DigitalInput(0);
+    private AnalogInput PESwitch = new AnalogInput(0);
+
+    public boolean isball = false;
 
 
     @Override
@@ -73,7 +77,7 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
 
-        Command autonomousCommand = container.getAutonomousCommand();
+        Command autonomousCommand = container.getAutonomousCommand().alongWith(parallel);
 
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
@@ -129,6 +133,7 @@ public class Robot extends TimedRobot {
         // .............................................................................
 
         //run intake in and out
+        boolean isball = (PESwitch.getValue() > Const.PESWITCH_UPPER_LIMIT);
         if (rightJoystick.getRawButtonPressed(2)) {
             isIntaking = !isIntaking;
         }
@@ -136,11 +141,13 @@ public class Robot extends TimedRobot {
         if (isIntaking) {
             intake.setIntakePower(-Const.INTAKE_SPEED);
             intake.setSolenoid(true);
-
-            // if they aren't reversing
-        } else {
+             
+        }
+        
+        else {
             intake.setIntakePower(0);
             intake.setSolenoid(false);
+
         }
 
         // left joystick left button disable color sensor
@@ -148,16 +155,17 @@ public class Robot extends TimedRobot {
             isColorSensorActive = !isColorSensorActive;
         }
 
+        // System.out.println(PESwitch.getValue());
         
         // left joystick middle button reverse WHILE intaking
-        if (leftJoystick.getRawButton(4)) {
+        if (rightJoystick.getRawButton(2)) {
             intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
             intake.setIntakePower(Const.INTAKE_SPEED);
             intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
         } else if (leftJoystick.getRawButton(3)) {
             intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
             // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
-        } else if (!IRSensor.get() && isColorSensorActive && isIntaking) {
+        } else if (isball && isColorSensorActive && isIntaking) {
             IRSensorTimer.start();
             isIRConveyorRunning = true;
         } else {
@@ -167,12 +175,12 @@ public class Robot extends TimedRobot {
             // colorSensor.getGreen() + " alpha " + alpha);
         }
 
-        if (isIRConveyorRunning && IRSensorTimer.get() < .4) {
-            // System.out.println("running timer " + IRSensorTimer.get());
+        if (isIRConveyorRunning && IRSensorTimer.get() < .5) {
             intake.setFrontConveyorPower(0.5);
         } else if (!leftJoystick.getRawButton(3) && !leftJoystick.getRawButton(4)) {
             isIRConveyorRunning = false;
             intake.setFrontConveyorPower(0);
+            IRSensorTimer.reset();
         }
 
         // if(IRSensor.get()) {
@@ -197,16 +205,24 @@ public class Robot extends TimedRobot {
         if (rightJoystick.getRawButton(1)) {
 
             double[] turnValues = vision.getTurnValues();
-            // System.out.println("left adjust " + turnValues[0] + "right adjust " +
-            // turnValues[1]);
-            container.TankDrive(turnValues[0] - leftJoystick.getRawAxis(1),
-                    turnValues[1] - rightJoystick.getRawAxis(1));
+                System.out.println("left adjust " + turnValues[0] + "right adjust " +
+                turnValues[1]);
+
+                //Turret Motor - Chris
+                turret.setTurretYawPower(-turnValues[0] * 0.25);
+                //Turret Motor - Chris
+                
+            container.TankDrive(-leftJoystick.getRawAxis(1), rightJoystick.getRawAxis(1));
+
+            //container.TankDrive(turnValues[0] - leftJoystick.getRawAxis(1),
+                    //turnValues[1] - rightJoystick.getRawAxis(1));
 
             // default drive
         } else {
             // TODO: bring this back
             //Vision.disableLEDS();
-            container.TankDrive(-leftJoystick.getRawAxis(1), rightJoystick.getRawAxis(1));
+             container.TankDrive(-leftJoystick.getRawAxis(1), rightJoystick.getRawAxis(1));
+             turret.setTurretYawPower(0);
         }
     }
 
@@ -243,35 +259,34 @@ public class Robot extends TimedRobot {
 
         if (auxJoystick.getRawAxis(3) > .3) {
             turret.shoot();
-             if (turret.getShooterError() <
-             Math.abs(Const.INTAKE_BACK_CONVEYOR_THRESHOLD)) {
-            // TODO: debug this
-             intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
-             intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-             }
+            if (turret.getShooterError() < Math.abs(Const.INTAKE_BACK_CONVEYOR_THRESHOLD)) {
+                // TODO: debug this
+                intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+                intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+            }
         } else {
              turret.stop();
              intake.setBackConveyorPower(0);
         }
 
-        if (auxJoystick.getRawButtonPressed(5)) {
-            isConveyorReversed = true;
-            conveyorReverseTimer.start();
-        }
+        // if (auxJoystick.getRawButtonPressed(5)) {
+        //     isConveyorReversed = true;
+        //     conveyorReverseTimer.start();
+        // }
 
-        if (isConveyorReversed && conveyorReverseTimer.get() < 0.1 && auxJoystick.getRawButton(5)) {
-            // System.out.println("running timer " + IRSensorTimer.get());
-            // intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
-            // intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
-        } else if (!isConveyorReversed && auxJoystick.getRawButton(5)) {
-            // intake.setFrontConveyorPower(-Const.FRONT_CONVEYOR_SPEED);
-            // intake.setBackConveyorPower(-Const.BACK_CONVEYOR_SPEED);
-        } else if (auxJoystick.getRawButton(6)) {
-            // intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
-        } else {
-            isConveyorReversed = false;
-            conveyorReverseTimer.reset();
-        }
+        // if (isConveyorReversed && conveyorReverseTimer.get() < 0.1 && auxJoystick.getRawButton(5)) {
+        //     System.out.println("running timer " + IRSensorTimer.get());
+        //     intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+        //     intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+        // } else if (!isConveyorReversed && auxJoystick.getRawButton(5)) {
+        //     intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+        //     intake.setBackConveyorPower(Const.BACK_CONVEYOR_SPEED);
+        // } else if (auxJoystick.getRawButton(6)) {
+        //     intake.setFrontConveyorPower(Const.FRONT_CONVEYOR_SPEED);
+        // } else {
+        //     isConveyorReversed = false;
+        //     conveyorReverseTimer.reset();
+        // }
 
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // Climbing
@@ -292,7 +307,8 @@ public class Robot extends TimedRobot {
         intake.setIntakePower(-Const.INTAKE_SPEED);
 
         // (red > Const.COLOR_RED_THRESHOLD && green > Const.COLOR_GREEN_THRESHOLD)
-        if (!IRSensor.get() && isColorSensorActive) {
+        if (isball && isColorSensorActive) {
+            
             IRSensorTimer.start();
             isIRConveyorRunning = true;
         } else {

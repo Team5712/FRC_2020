@@ -81,7 +81,15 @@ public class RobotContainer {
         bouncePath.add("Bounce_1.wpilib.json");
         chooser.addOption("Bounce Path", bouncePath);
 
-        SmartDashboard.putData("Auto Mode", chooser);
+        ArrayList<String> galacticSearch = new ArrayList<String>();
+        galacticSearch.add("GalacticSearch_0.wpilib.json");
+
+        galacticSearch.add("GalacticSearch_1.wpilib.json");
+        chooser.addOption("Galactic Search", galacticSearch);
+
+
+        SmartDashboard.putData("Auto 2 Mode", chooser);
+        SmartDashboard.updateValues();
 
     }
 
@@ -95,6 +103,7 @@ public class RobotContainer {
 		for(String paths: chooser.getSelected()) {
             autonPaths.addCommands(pathweaverCommands.get(paths));
         }
+        
         return autonPaths;
     }
 

@@ -54,6 +54,7 @@ public class Const {
     public static final double INTAKE_BACK_CONVEYOR_THRESHOLD = 200;
     public static final double FRONT_CONVEYOR_SPEED = 1.0;
     public static final double BACK_CONVEYOR_SPEED = 1;
+    public static final int PESWITCH_UPPER_LIMIT = 1000;
 
     // 10.8
     public static final double Kp = 3;

@@ -8,7 +8,7 @@ import frc.robot.subsystems.Turret;
 /**
  * This completes a full cycle of shooting towards the target
  * 
- * This includes: turning aligning ramping up wheeel speed moving intake wheels
+ * This includes: turning aligning ramping up wheel speed moving intake wheels
  * shooting
  * 
  * This class extends the ParallelDeadlineGroup, which takes a list of commands and completes 
